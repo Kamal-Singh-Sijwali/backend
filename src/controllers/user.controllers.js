@@ -10,7 +10,7 @@ const generateAccessAndRefreshToken = async (userId) =>{
     const accesstoken = user.generateAccessToken()
     const refreshToken = user.generateRefreshToken()
 
-    user.refeshtoken = refreshToken
+    user.refreshtoken = refreshToken
     await user.save({validateBeforeSave:false})
 
     return {accesstoken,refreshToken}
@@ -26,7 +26,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // check for image, check for avatar
   // upload them to cloudinary
   // create user object - create entry in DB
-  // remove password and refeshToken field from response
+  // remove password and refreshToken field from response
   // check for user creation
   // return res
 
@@ -130,7 +130,7 @@ const loginUser = asyncHandler(async(req,res)=>{
 
     return res.status(200)
           .cookie("accessToken",accesstoken,options)
-          .cookie("refeshToken",refreshToken,options)
+          .cookie("refreshToken",refreshToken,options)
           .json(
             new apiResponse(200,
               {
