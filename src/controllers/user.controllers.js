@@ -253,4 +253,17 @@ const loginUser = asyncHandler(async(req,res)=>{
             ))
   })
 
-export { registerUser ,loginUser,logoutUser,refreshAccessToken};
+  // ============ Current user ==============
+
+  const getCurrentUser = asyncHandler(async(req,res)=>{
+    return res.status(200)
+      .json(new apiResponse(
+        200,
+        req.user,
+        "current user fetched successfully"
+      ))
+  })
+
+  // =============== update account deatils ===============
+
+export { registerUser ,loginUser,logoutUser,refreshAccessToken,changePasssword,getCurrentUser};
