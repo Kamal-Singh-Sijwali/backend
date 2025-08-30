@@ -281,6 +281,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 // --------------- Avatar update  ===================
+// delete avatar after successfully update
 
 const updateAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
@@ -295,7 +296,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
     throw new apiError(400, "Error while uploading avatar");
   }
 
- const user =  await User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -305,39 +306,113 @@ const updateAvatar = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-    return res.status(200)
-          .json(new apiResponse(200,
-            user,
-            "Avatar updated"
-          ))
+  return res.status(200).json(new apiResponse(200, user, "Avatar updated"));
 });
 
 // ============ update user cover image ===========
 
-const updateCoverImage = asyncHandler(async(req,res)=>{
-  const coverLocalPath = req.file?.path
+const updateCoverImage = asyncHandler(async (req, res) => {
+  const coverLocalPath = req.file?.path;
 
-  if(!coverLocalPath){
-    throw new apiError(400,"Cover image is missing")
+  if (!coverLocalPath) {
+    throw new apiError(400, "Cover image is missing");
   }
 
-  const coverImage = await uploadOncloudinary(coverLocalPath)
+  const coverImage = await uploadOncloudinary(coverLocalPath);
 
-  const user = await User.findByIdAndUpdate(req.user?._id,
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
     {
-      $set:{
-        coverImage:coverImage?.url
-      }
+      $set: {
+        coverImage: coverImage?.url,
+      },
     },
-    {new:true}
-  ).select("-password")
+    { new: true }
+  ).select("-password");
 
-  return res.status(200)
-          .json(new apiResponse(200,
-            user,
-            "cover image updated"
-          ))
-})
+  return res
+    .status(200)
+    .json(new apiResponse(200, user, "cover image updated"));
+});
+
+// ============ user channel profile + aggregate ==============
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  if (!username) {
+    throw new apiError(400, "Channel name is missing");
+  }
+
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    {
+      $lookup: {
+        from: "subscribers",
+        localField: "_id",
+        foreignField: "channel", // to get subscribers
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscribers",
+        localField: "_id",
+        foreignField: "subscriber", // subscribed to
+        as: "subscribedTo",
+      },
+    },
+    {
+      $addFields: {
+        subscriberCounts: {
+          $size: "$subscribers",
+        },
+        channelSubscribeToCount: {
+          $size: "$subscribedTo",
+        },
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project:{
+        fullName:1,
+        username:1,
+        avatar:1,
+        coverImage:1,
+        username:1,
+        subscriberCounts:1,
+        channelSubscribeToCount:1,
+        isSubscribed:1
+
+      }
+    }
+
+
+
+
+  ]);
+
+// check console of channel and check dataype then work further
+   
+if(!channel.length){
+  throw new apiError(400,"channel does not exists")
+}
+
+return res.status(200).
+json(new apiResponse(200,channel[0],"fetched successfully"))
+
+
+});
 
 export {
   registerUser,
@@ -348,5 +423,7 @@ export {
   getCurrentUser,
   updateAccountDetails,
   updateAvatar,
-  updateCoverImage
+  updateCoverImage,
+  getUserChannelProfile
+
 };
