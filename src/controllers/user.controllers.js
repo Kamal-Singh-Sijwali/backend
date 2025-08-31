@@ -4,6 +4,7 @@ import { apiError } from "../utils/apiError.js";
 import { apiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOncloudinary } from "../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -156,8 +157,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1, // this removes the field from document
       },
     },
     {
@@ -402,6 +403,8 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
   ]);
 
+  console.log("channel*********",channel)
+
 // check console of channel and check dataype then work further
    
 if(!channel.length){
@@ -414,6 +417,57 @@ json(new apiResponse(200,channel[0],"fetched successfully"))
 
 });
 
+// ============== watch history = ============ 
+const getWatchHistory = asyncHandler(async(req,res)=>{
+  const user = await User.aggregate([
+    {
+      $match:{
+        _id:new mongoose.Types.ObjectId(req.user._id)
+      }
+    },
+    {
+      $lookup:{
+        from:"videos",
+        localField:"watchHistoy",
+        foreignField:"_id",
+        as:"watchHistoy",
+        pipeline:[
+          {
+            $lookup:{
+              from:"users",
+              localField:"owner",
+              foreignField:"_id",
+              as:"owner",
+              pipeline:[
+                {
+                  $project:{
+                    fullName:1,
+                    username:1,
+                    avatar:1,
+                    coverImage:1,
+
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields:{
+              owner:{
+                $first:"$owner"
+              }
+            }
+          }
+        ]
+      }
+    },
+ 
+  ])
+return res.status(200)
+        .json(new apiResponse(200,user[0].wathHistory,"Watch history fetched successfully"))
+
+})
+
 export {
   registerUser,
   loginUser,
@@ -424,6 +478,7 @@ export {
   updateAccountDetails,
   updateAvatar,
   updateCoverImage,
-  getUserChannelProfile
+  getUserChannelProfile,
+  getWatchHistory
 
 };
