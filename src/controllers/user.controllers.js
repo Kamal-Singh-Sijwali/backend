@@ -232,6 +232,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 // ============ change password = ===========
 const changePasssword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
+  console.log("**********",oldPassword,newPassword)
 
   const user = await User.findById(req.user?._id);
 
@@ -261,12 +262,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
+  console.log("*******upadte account",fullName,email)
   if (!fullName || !email) {
     throw new apiError(400, "All fields are required");
   }
 
   const user = await User.findByIdAndUpdate(
-    re1.user?._id,
+    req.user?._id,
     {
       $set: {
         fullName,
@@ -403,7 +405,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
   ]);
 
-  console.log("channel*********",channel)
+  
 
 // check console of channel and check dataype then work further
    
