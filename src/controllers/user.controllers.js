@@ -55,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new apiError(409, "User name or email already existed");
   }
   // console.log("req file==>",req.files)
-  const avatarLocalPath = req.files?.avatar[0]?.path;
+  const avatarLocalPath = req.files?.avatar?.[0]?.path;
   if (!avatarLocalPath) {
     throw new apiError(402, "Avatar is required");
   }
@@ -102,6 +102,7 @@ const loginUser = asyncHandler(async (req, res) => {
   // send cookie
 
   const { username, email, password } = req.body;
+  console.log("**** user ",req)
 
   if (!email) {
     throw new apiError(400, "Username or password is required");
@@ -110,6 +111,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const user = await User.findOne({
     $or: [{ username }, { email }],
   });
+  // console.log("*******login user",user)
 
   if (!user) {
     throw new apiError(400, "User does not exist");
