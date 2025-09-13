@@ -20,7 +20,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
        if(!usersVideos){
       throw new apiError(400,"no videos for current user")
     }
-    console.log("videos  ",usersVideos)
+    console.log("videos ************ ",usersVideos)
 
     return res.status(200)
        .json(new apiResponse(200,usersVideos,"all videos fetched"))
