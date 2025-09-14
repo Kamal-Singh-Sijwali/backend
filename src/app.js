@@ -22,6 +22,7 @@ app.use(cookieParser());
 import userRouter from "./routes/user.routes.js"
 import videoRouter from "./routes/video.routes.js"
 import playListRouter from './routes/playlist.routes.js';
+import subscriberRouter from "./routes/subscribe.routes.js"
 
 import connectDB from './db/index.js';
 
@@ -31,6 +32,8 @@ import connectDB from './db/index.js';
 app.use("/api/v1/users",userRouter)
 app.use("/api/v1/videos",videoRouter)
 app.use("/api/v1/playlist",playListRouter)
+app.use("/api/v1/subscribe",subscriberRouter)
+
 
 
 
