@@ -26,6 +26,7 @@ import subscriberRouter from "./routes/subscribe.routes.js"
 import commemntsRouter from "./routes/comment.routes.js"
 import likesRouter from "./routes/like.routes.js"
 import tweetsRouter from "./routes/tweet.routes.js"
+import dashboardRouter from "./routes/dashboard.routes.js"
 
 import connectDB from './db/index.js';
 
@@ -39,6 +40,7 @@ app.use("/api/v1/subscribe",subscriberRouter)
 app.use("/api/v1/comment",commemntsRouter)
 app.use("/api/v1/like",likesRouter)
 app.use("/api/v1/tweet",tweetsRouter)
+app.use("/api/v1/dashboard",dashboardRouter)
 
 
 
