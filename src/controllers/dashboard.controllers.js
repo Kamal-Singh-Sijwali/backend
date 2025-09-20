@@ -20,7 +20,8 @@ const getChannelStats = asyncHandler(async (req, res) => {
         throw new apiError(400,"Channel is invalid")
     }
     const channelAllVideos = await Video.find({owner:channelId})
-    // const channelAllLikes = await Like.find({owner:channelId})
+    const channelAllLikes = await Like.find({video:channelAllVideos.map((id)=>id?._id)})
+    console.log("***********likes**",channelAllLikes)
     const channelSubscribers = await Subscription.find({subscriber:channelId})
      if(!channelAllVideos){
         throw new apiError(400,"Error no videos found")
@@ -31,12 +32,12 @@ const getChannelStats = asyncHandler(async (req, res) => {
      if(!channelSubscribers){
         throw new apiError(400,"Error while finding suscribers")
     }
-    console.log("***********",channelAllVideos.map((view)=>view?.views).reduce((acc,cur)=>acc+cur))
+    // console.log("***********",channelAllVideos.map((view)=>view?.views).reduce((acc,cur)=>acc+cur))
     const stats = {
         views:channelAllVideos.map((view)=>view?.views).reduce((acc,cur)=>acc+cur),
         subscribers:channelSubscribers.length,
         totalVideos:channelAllVideos.length,
-        // likes:1
+        likes:channelAllLikes.length
     }
      return res.status(200)
         .json(new apiResponse(200,stats,"Channel all Stats"))
